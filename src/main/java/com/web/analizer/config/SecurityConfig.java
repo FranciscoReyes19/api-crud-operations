@@ -86,13 +86,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .permitAll()
                     .antMatchers("/api/user/checkUsernameAvailability", "/api/user/checkEmailAvailability")
                         .permitAll()
-                    .antMatchers(HttpMethod.GET, "/api/users/**","/mutation/**","/stats/**", "/api/expedientes/**")
+                    .antMatchers(HttpMethod.GET, "/api/users/**","/expediente/**", "/api/expedientes/**")
                         .permitAll()
-                    .antMatchers(HttpMethod.POST, "/mutationby/**")
+                    .antMatchers(HttpMethod.POST, "/expediente/**")
+                        .permitAll()
+                    .antMatchers(HttpMethod.PUT, "/expediente/**")
+                        .permitAll()
+                    .antMatchers(HttpMethod.DELETE, "/expediente/**")
                         .permitAll()
                     .anyRequest()
                         .authenticated();
-
         // Add our custom JWT security filter
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 

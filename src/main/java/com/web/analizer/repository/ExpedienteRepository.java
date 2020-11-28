@@ -13,9 +13,11 @@ import com.web.analizer.model.User;
 public interface ExpedienteRepository extends JpaRepository<Expediente, Long> {
     
 	Optional<Expediente> findByAdn(Expediente expediente);
-    
+
+	Optional<Expediente> findById(Long id);
+
     Boolean findByName(String Name);
-    
+
     /* mutation=true, Unmutation=false */
     List<Expediente> findByResult(Boolean mutation);
 }

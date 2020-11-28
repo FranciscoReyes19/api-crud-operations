@@ -86,7 +86,7 @@ public class Mutation {
 	       
 	   }
 	   
-	    //Transform vertical secuences into lineal string to allow OneByOne anlisis
+	    //Transform vertical secuences into lineal string to allow OneByOne analisis
 	    //Parameter Factor: to know difference between vertical numbers
 	    public String TransformVerticalToLineal(int Factor){
 	        String adn = this.adn;
@@ -104,6 +104,7 @@ public class Mutation {
 	       }
 	       return fila;
 	    }
+
 	    //Transform diagonal secuences into lineal string to allow OnebyOne analisis
 	    //Parameter indexs: to start from Rigth or Left
 	    //Parameter Factor: to know difference between diagonal numbers
@@ -113,7 +114,7 @@ public class Mutation {
 	        String fila = "";
 	       
 	        int[] indexs = Indexs;
-	        int[] limit = {4,5,6,5,4};
+	        int[] limit = { 4,5,6,5,4 };
 	       
 	       for(int i = 0;i<=4;i++){
 	           
@@ -126,6 +127,7 @@ public class Mutation {
 	       }
 	       return fila;
 	    }
+
 	public String AddPipes(){
 	        String origin = this.adn;
 	        String nuevo = "";

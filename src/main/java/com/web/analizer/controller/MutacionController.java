@@ -1,17 +1,15 @@
 package com.web.analizer.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
+import com.web.analizer.payload.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.web.analizer.exception.AppException;
 import com.web.analizer.model.Expediente;
@@ -24,11 +22,7 @@ import com.web.analizer.repository.UserRepository;
 import com.web.analizer.service.Mutation;
 
 //Request Response imports
-import com.web.analizer.payload.ApiResponse;
-import com.web.analizer.payload.ExpedienteRequest;
-import com.web.analizer.payload.ExpedientesRequest;
-import com.web.analizer.payload.ExpedientesResponse;
-import com.web.analizer.payload.StatsResponse;
+
 
 @RestController
 @RequestMapping("/")
@@ -40,27 +34,17 @@ public class MutacionController {
 	@Autowired
     Mutation mutationService;
 
-    @PostMapping("/mutation")
-    public ResponseEntity<?> registerHuman(@RequestBody ExpedienteRequest expedienteRequest) {
+    @PostMapping("/expediente")
+    public ResponseEntity<?> newExpediente(@RequestBody ExpedienteRequest expedienteRequest) {
     // Creating new Expediente
 	
     ApiResponse response = new ApiResponse(false,"");
     
-    //Mutation mutation = new Mutation(expedienteRequest.getAdn());
-    //Boolean result = mutation.GetResult();
-    Boolean result = mutationService.GetResult(expedienteRequest.getAdn());
-	String r = "";
-    if(result) {
-		r = "Has mutation";
-	}
-    else {
-    	r= "Hasn´t mutation";
-    }
-    Expediente expediente = new Expediente(expedienteRequest.getName(), expedienteRequest.getAdn(),result);
+    Expediente expediente = new Expediente(expedienteRequest.getName(), expedienteRequest.getAdn(), expedienteRequest.getResult() );
 
-	try {
+		try {
 		expedienteRepository.save(expediente);
-		response.setMessage(r);
+		response.setMessage("created success");
 		response.setSuccess(true);
 		}
 		catch(Exception e) {
@@ -71,7 +55,7 @@ public class MutacionController {
     return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/mutation")
+    @GetMapping("/expediente")
     public ResponseEntity<?> getExpedientes() {
     	List<Expediente> expedientes;
     	
@@ -80,34 +64,69 @@ public class MutacionController {
     	ExpedientesResponse response = new ExpedientesResponse(expedientes,"message");
     	
         return ResponseEntity.ok(response);
-    	}
-    @PostMapping("/mutationby")
-    public ResponseEntity<?> getExpedientes(@RequestBody ExpedientesRequest expedientesRequest) {
-    	List<Expediente> expedientes;
-    	
-    	if(expedientesRequest.getHasMutation() != null) {
-    		Boolean hasMutation = expedientesRequest.getHasMutation();
-        	expedientes = expedienteRepository.findByResult(hasMutation);
-        	
-        	ExpedientesResponse response = new ExpedientesResponse(expedientes,"message");
-        	
-            return ResponseEntity.ok(response);
-        }
-        else {
-        	return ResponseEntity.ok(new ApiResponse(false,"error"));
-        }
-    	
     }
-    @GetMapping("/stats")
-    public ResponseEntity<?> getStats() {
-    	int has = mutationService.getCountHas();
-    	int hasnt = mutationService.getCountHasnt();
-    	//int total = mutationService.getCountAll();
-    	int ratio = has / hasnt;
-    	
-    	StatsResponse response = new StatsResponse(has,hasnt,ratio,"success");
-    	
-    	return ResponseEntity.ok(response);
-    }
-    
+
+	@GetMapping("/expediente/{id}")
+	public ResponseEntity<?> getExpediente(@PathVariable Long id) {
+		Optional<Expediente> expediente;
+
+		expediente = expedienteRepository.findById(id);
+
+		ExpedienteResponse response = new ExpedienteResponse(expediente,"message");
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/expediente/{id}")
+	public ResponseEntity<?> updateExpedientes(@RequestBody ExpedienteRequest expedienteRequest, @PathVariable Long id) {
+
+    	Optional<Expediente> expediente;
+
+    	expediente = expedienteRepository.findById(id);
+
+		ExpedienteResponse response;
+		if(expediente.isPresent()){
+			//Get first element
+			Expediente exp = expediente.get();
+			System.out.println("data:" + exp);
+			//Set data to update
+			exp.setName(expedienteRequest.getName());
+			exp.setResult(expedienteRequest.getResult());
+			//flush to database
+			expedienteRepository.save(exp);
+
+			response = new ExpedienteResponse(expediente,"update success");
+		}else{
+			response = new ExpedienteResponse("update error");
+		}
+
+		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/expediente/{id}")
+	public ResponseEntity<?> deleteExpedientes(@RequestBody IdentifierRequest identiferrequest, @PathVariable Long id) {
+
+		Optional<Expediente> expediente;
+
+		if( id == null ){
+			id = identiferrequest.getId();
+		}
+
+		expediente = expedienteRepository.findById(id);
+
+		ExpedienteResponse response;
+		if(expediente.isPresent()){
+			//Get first element
+			Expediente exp = expediente.get();
+
+			//flush to database
+			expedienteRepository.delete(exp);
+
+			response = new ExpedienteResponse("delete success");
+		}else{
+			response = new ExpedienteResponse("delete error");
+		}
+
+		return ResponseEntity.ok(response);
+	}
 }
